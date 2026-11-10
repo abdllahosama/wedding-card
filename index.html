@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>عبدالله & منار | دعوة زفاف</title>
+  <meta name="description" content="يسعدنا دعوتكم لحضور حفل زفاف عبدالله ومنار" />
+  <meta name="theme-color" content="#f4ecdf" />
+
+  <!-- معاينة اللينك في واتساب وفيسبوك: غيّر YOUR-DOMAIN للينك الموقع بعد الرفع -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="عبدالله & منار — دعوة زفاف" />
+  <meta property="og:description" content="يسعدنا حضورك ومشاركتنا فرحتنا 🤍" />
+  <meta property="og:image" content="https://YOUR-DOMAIN/images/og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="images/hero.jpg" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="locked">
+
+  <!-- ================= الظرف ================= -->
+  <section class="gate" id="gate" aria-label="الدعوة">
+    <div class="gate-inner">
+      <p class="gate-to"><span class="gate-to-label">دعوة خاصة إلى</span><span class="gate-to-name" id="gateName">أحبابنا الغاليين</span></p>
+
+      <div class="envelope" id="envelope">
+        <div class="env-back"></div>
+        <div class="env-letter">
+          <div class="letter-inner">
+            <span class="letter-kicker">دعوة زفاف</span>
+            <span class="letter-names"><span data-bind="groom"></span> <em>&</em> <span data-bind="bride"></span></span>
+            <span class="letter-date" data-bind="dateText"></span>
+          </div>
+        </div>
+        <div class="env-pocket"></div>
+        <div class="env-flap"></div>
+        <button class="seal" id="seal" type="button" aria-label="افتح الدعوة">
+          <span class="seal-mono"><span id="mono1">ع</span><i></i><span id="mono2">م</span></span>
+        </button>
+      </div>
+
+      <p class="gate-hint">اضغط على الختم لفتح الدعوة</p>
+    </div>
+  </section>
+
+  <!-- زرار الموسيقى -->
+  <button class="music" id="musicBtn" type="button" aria-label="تشغيل/إيقاف الموسيقى" hidden>
+    <span class="bars"><i></i><i></i><i></i><i></i></span>
+  </button>
+  <audio id="music" loop preload="none"></audio>
+
+  <main id="site">
+
+    <!-- ================= الهيرو ================= -->
+    <header class="hero">
+      <div class="hero-media"><img src="images/hero.jpg" alt="عبدالله ومنار أمام مسجد الغفور الودود" /></div>
+      <div class="hero-shade"></div>
+      <div class="hero-content">
+        <p class="basmala reveal">بسم الله الرحمن الرحيم</p>
+        <h1 class="names reveal">
+          <span data-bind="groom"></span>
+          <span class="amp">&</span>
+          <span data-bind="bride"></span>
+        </h1>
+        <p class="hero-greet reveal" id="heroGreet">يسعدنا حضوركم ومشاركتنا فرحتنا</p>
+        <p class="hero-date reveal"><span data-bind="dateText"></span></p>
+      </div>
+      <a href="#ayah" class="scroll-cue" aria-label="انزل لتحت"><span></span></a>
+    </header>
+
+    <!-- ================= الآية ================= -->
+    <section class="ayah" id="ayah">
+      <div class="star reveal" aria-hidden="true">
+        <svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="1.4"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="12"/></g></svg>
+      </div>
+      <blockquote class="reveal">
+        <p>ومن آياته أن خلق لكم من أنفسكم أزواجا لتسكنوا إليها وجعل بينكم مودة ورحمة</p>
+        <cite>سورة الروم · ٢١</cite>
+      </blockquote>
+    </section>
+
+    <!-- ================= القصة ================= -->
+    <section class="story">
+      <article class="chapter">
+        <div class="chapter-media">
+          <figure class="frame arch reveal"><img src="images/story-1.jpg" alt="" loading="lazy" /></figure>
+          <figure class="frame small reveal"><img src="images/story-2.jpg" alt="" loading="lazy" /></figure>
+        </div>
+        <div class="chapter-text reveal">
+          <span class="chapter-num">الفصل الأول</span>
+          <h2>الميثاق</h2>
+          <p>في رحاب <strong data-bind="mosque"></strong> وبين أهلنا وأحبابنا كتبنا كتابنا يوم <strong data-bind="katbDateText"></strong> وبدأنا أجمل حكاية في عمرنا</p>
+        </div>
+      </article>
+
+      <article class="chapter flip">
+        <div class="chapter-media">
+          <figure class="frame tall reveal"><img src="images/story-3.jpg" alt="" loading="lazy" /></figure>
+          <figure class="frame small reveal"><img src="images/story-4.jpg" alt="" loading="lazy" /></figure>
+        </div>
+        <div class="chapter-text reveal">
+          <span class="chapter-num">الفصل الثاني</span>
+          <h2>الطريق</h2>
+          <p>ومن يومها وإحنا ماشيين سوا إيد في إيد بنحلم ونخطط ونستنى اليوم اللي هنبدأ فيه بيتنا</p>
+        </div>
+      </article>
+
+      <div class="next-station reveal">
+        <span class="chapter-num">الفصل الثالث</span>
+        <h2>والمحطة الجاية… فرحنا</h2>
+        <p>ومش هتكمل فرحتنا غير بوجودكم</p>
+      </div>
+    </section>
+
+    <!-- ================= نص الدعوة + العد التنازلي ================= -->
+    <section class="invite">
+      <div class="invite-card reveal">
+        <p class="invite-hosts" data-bind="hosts"></p>
+        <p class="invite-line">بدعوتكم لحضور حفل زفاف</p>
+        <p class="invite-names"><span data-bind="groom"></span> <em>&</em> <span data-bind="bride"></span></p>
+        <div class="divider" aria-hidden="true"><span></span><i></i><span></span></div>
+
+        <div class="countdown" id="countdown" aria-live="polite">
+          <div><b data-cd="d">٠</b><small>يوم</small></div>
+          <div><b data-cd="h">٠</b><small>ساعة</small></div>
+          <div><b data-cd="m">٠</b><small>دقيقة</small></div>
+          <div><b data-cd="s">٠</b><small>ثانية</small></div>
+        </div>
+        <p class="countdown-done" id="countdownDone" hidden>النهارده الفرح 🤍</p>
+      </div>
+    </section>
+
+    <!-- ================= التفاصيل ================= -->
+    <section class="details">
+      <div class="detail reveal">
+        <div class="detail-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>
+        </div>
+        <h3>الموعد</h3>
+        <p class="detail-main" data-bind="dateText"></p>
+        <p class="detail-sub" data-bind="timeText"></p>
+        <div class="btn-row">
+          <a class="btn" id="gcalBtn" target="_blank" rel="noopener">Google Calendar</a>
+          <button class="btn ghost" id="icsBtn" type="button">Apple / Outlook</button>
+        </div>
+      </div>
+
+      <div class="detail reveal">
+        <div class="detail-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        </div>
+        <h3>المكان</h3>
+        <p class="detail-main" data-bind="venueName"></p>
+        <p class="detail-sub" data-bind="venueAddress"></p>
+        <div class="btn-row">
+          <a class="btn" id="mapsBtn" target="_blank" rel="noopener">افتح اللوكيشن</a>
+        </div>
+      </div>
+    </section>
+    <div class="map-wrap reveal" id="mapWrap" hidden><iframe id="mapFrame" title="خريطة المكان" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+
+    <!-- ================= تأكيد الحضور ================= -->
+    <section class="rsvp" id="rsvp">
+      <div class="rsvp-card reveal">
+        <span class="chapter-num">تأكيد الحضور</span>
+        <h2>هتنورنا؟</h2>
+        <p class="rsvp-note">ياريت تأكد حضورك <span data-bind="rsvpDeadlineText"></span> عشان نجهزلك مكانك</p>
+
+        <form id="rsvpForm" novalidate>
+          <label class="field">
+            <span>الاسم</span>
+            <input type="text" name="name" id="rsvpName" required autocomplete="name" placeholder="اسمك" />
+          </label>
+
+          <fieldset class="choice">
+            <legend>هتقدر تيجي؟</legend>
+            <label><input type="radio" name="attending" value="yes" checked /><span>أكيد جاي إن شاء الله</span></label>
+            <label><input type="radio" name="attending" value="no" /><span>للأسف مش هقدر</span></label>
+          </fieldset>
+
+          <label class="field" id="countField">
+            <span>عدد الأفراد</span>
+            <div class="stepper">
+              <button type="button" data-step="-1" aria-label="أقل">−</button>
+              <output id="guestCount">١</output>
+              <button type="button" data-step="1" aria-label="أكتر">+</button>
+            </div>
+          </label>
+
+          <label class="field">
+            <span>كلمة للعروسين <small>(اختياري)</small></span>
+            <textarea name="message" rows="3" placeholder="تهنئة أو دعوة حلوة…"></textarea>
+          </label>
+
+          <button class="btn solid wide" type="submit" id="rsvpSubmit">ابعت الرد</button>
+          <p class="form-error" id="rsvpError" hidden></p>
+        </form>
+
+        <div class="rsvp-done" id="rsvpDone" hidden>
+          <div class="star small" aria-hidden="true"><svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/></g></svg></div>
+          <h3 id="rsvpDoneTitle">ردك وصلنا</h3>
+          <p id="rsvpDoneText">شكرا إنك أكدت 🤍</p>
+          <button type="button" class="link-btn" id="rsvpEdit">عاوز تعدل ردك؟</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= الصور ================= -->
+    <section class="gallery-sec">
+      <div class="sec-head reveal">
+        <span class="chapter-num">من يوم كتب الكتاب</span>
+        <h2>لحظات</h2>
+      </div>
+      <div class="gallery" id="gallery"></div>
+    </section>
+
+    <!-- ================= الختام ================= -->
+    <section class="finale">
+      <img src="images/finale.jpg" alt="" loading="lazy" />
+      <div class="finale-shade"></div>
+      <div class="finale-content reveal">
+        <p>بانتظاركم لتكتمل فرحتنا</p>
+        <h2><span data-bind="groom"></span> <em>&</em> <span data-bind="bride"></span></h2>
+        <span class="finale-date" data-bind="dateText"></span>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p>اللهم بارك لهما وبارك عليهما واجمع بينهما في خير</p>
+    </footer>
+  </main>
+
+  <!-- عارض الصور -->
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lb-close" type="button" aria-label="إغلاق">×</button>
+    <button class="lb-nav lb-prev" type="button" aria-label="السابقة">‹</button>
+    <img alt="" />
+    <button class="lb-nav lb-next" type="button" aria-label="التالية">›</button>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

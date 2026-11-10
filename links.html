@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>مولد لينكات الضيوف</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    body { margin: 0; font-family: "IBM Plex Sans Arabic", system-ui, sans-serif; background: #f5eee2; color: #2a251f; line-height: 1.8; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+    h1 { margin: 0 0 4px; font-size: 1.7rem; }
+    .muted { color: #6d6355; font-size: .92rem; }
+    .card { background: #fff; border-radius: 16px; padding: 22px; margin-top: 22px; box-shadow: 0 10px 30px -20px rgba(92,70,38,.4); }
+    label { display: block; font-weight: 500; margin-bottom: 6px; }
+    textarea, input { width: 100%; box-sizing: border-box; font: inherit; border: 1px solid #dccaa9; border-radius: 10px; padding: 10px 12px; background: #fcf9f4; }
+    textarea { min-height: 170px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    button, .wa { font: inherit; border: 0; border-radius: 999px; padding: 8px 16px; background: #7d5f33; color: #fff; cursor: pointer; text-decoration: none; font-size: .88rem; white-space: nowrap; }
+    button.ghost { background: transparent; color: #7d5f33; border: 1px solid #7d5f33; }
+    .wa { background: #25d366; color: #073b1d; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    td { padding: 10px 6px; border-bottom: 1px solid #ebdfca; vertical-align: middle; }
+    td.link { direction: ltr; text-align: left; font-size: .78rem; color: #6d6355; word-break: break-all; }
+    td.act { display: flex; gap: 6px; justify-content: flex-end; }
+    .top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    @media (max-width: 640px) { .row { grid-template-columns: 1fr; } td.link { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>مولد لينكات الضيوف</h1>
+    <p class="muted">اكتب كل ضيف في سطر. لو عاوز تحدد أقصى عدد أفراد ليه اكتب بعد الاسم علامة | والرقم مثلا: <b>أستاذ محمد|3</b></p>
+
+    <div class="card">
+      <label for="names">أسماء الضيوف</label>
+      <textarea id="names" placeholder="أستاذ محمد|3&#10;خالتي سعاد|2&#10;أحمد"></textarea>
+      <div class="row">
+        <div>
+          <label for="base">لينك الموقع</label>
+          <input id="base" dir="ltr" placeholder="https://abdallah-manar.com" />
+        </div>
+        <div>
+          <label for="tpl">نص رسالة الواتساب</label>
+          <input id="tpl" value="السلام عليكم يا {name} 🤍 يسعدنا دعوتك لحضور فرحنا وده كارت الدعوة:" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <b id="countLbl">٠ لينك</b>
+        <button class="ghost" id="copyAll" type="button">انسخ الكل</button>
+      </div>
+      <table><tbody id="out"></tbody></table>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script>
+    const C = window.WEDDING;
+    const $ = (s) => document.querySelector(s);
+    const base = $("#base"), names = $("#names"), tpl = $("#tpl"), out = $("#out");
+    base.value = C.siteUrl || location.href.replace(/links\.html.*$/, "");
+    names.value = localStorage.getItem("links:names") || "";
+    let rows = [];
+
+    function build() {
+      localStorage.setItem("links:names", names.value);
+      const root = base.value.trim().replace(/\/?$/, "/");
+      rows = names.value.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
+        const [name, n] = l.split("|").map((x) => x.trim());
+        const p = new URLSearchParams({ to: name });
+        if (n) p.set("n", n);
+        return { name, link: `${root}?${p}` };
+      });
+      out.innerHTML = "";
+      rows.forEach(({ name, link }) => {
+        const tr = document.createElement("tr");
+        const tdName = document.createElement("td"); tdName.textContent = name;
+        const tdLink = document.createElement("td"); tdLink.className = "link"; tdLink.textContent = link;
+        const tdAct = document.createElement("td"); tdAct.className = "act";
+        const copy = document.createElement("button"); copy.type = "button"; copy.className = "ghost"; copy.textContent = "نسخ";
+        copy.onclick = () => navigator.clipboard.writeText(link).then(() => { copy.textContent = "اتنسخ ✓"; setTimeout(() => copy.textContent = "نسخ", 1500); });
+        const wa = document.createElement("a"); wa.className = "wa"; wa.target = "_blank"; wa.rel = "noopener"; wa.textContent = "واتساب";
+        wa.href = "https://wa.me/?text=" + encodeURIComponent(tpl.value.replace("{name}", name) + "\n" + link);
+        tdAct.append(copy, wa);
+        tr.append(tdName, tdLink, tdAct);
+        out.append(tr);
+      });
+      $("#countLbl").textContent = `${rows.length.toLocaleString("ar-EG")} لينك`;
+    }
+    [base, names, tpl].forEach((el) => el.addEventListener("input", build));
+    $("#copyAll").onclick = () => navigator.clipboard.writeText(rows.map((r) => `${r.name}: ${r.link}`).join("\n"));
+    build();
+  </script>
+</body>
+</html>
