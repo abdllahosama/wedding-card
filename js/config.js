@@ -15,12 +15,12 @@ window.WEDDING = {
   mosque: "مسجد الغفور الودود",
 
   // ——— الفرح ———  ⚠️ لازم تعدل دول
-  date: "2026-12-04T19:00:00+02:00",  // ⚠️ الوقت لسه مؤقت (٧ مساءً) — +02:00 = توقيت القاهرة
+  date: "2026-12-04T16:00:00+02:00",  // +02:00 = توقيت القاهرة
   durationHours: 5,                   // مدة الحفلة (للتقويم)
   dateText: "الجمعة ٤ ديسمبر ٢٠٢٦",
-  timeText: "السابعة مساءً",           // ⚠️ عدّلها مع الوقت اللي فوق
+  timeText: "الرابعة عصرًا",
   venueName: "قاعة سيليا للمناسبات",
-  venueAddress: "دمياط الجديدة",       // ⚠️ اتأكد أو اكتب العنوان بالتفصيل
+  venueAddress: "رأس البر",
   mapsUrl: "https://maps.app.goo.gl/G5aGF4nYuj4FJZH76",
   mapEmbedUrl: "https://maps.google.com/maps?q=31.4861551,31.8237867&z=16&hl=ar&output=embed",
 
@@ -34,5 +34,5 @@ window.WEDDING = {
   music: "audio/music.mp3",           // حط ملف mp3 بنفس الاسم في فولدر audio (لو مش موجود الزرار هيختفي لوحده)
 
   // ——— لينك الموقع بعد الرفع ———
-  siteUrl: "",                        // مثال: https://abdallah-manar.com — بيستخدمه مولد اللينكات
+  siteUrl: "https://abdllahosama.github.io/wedding-card/",   // بيستخدمه مولد اللينكات
 };

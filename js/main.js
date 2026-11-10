@@ -60,7 +60,7 @@
       audio.play().then(() => {
         setPlaying(true);
         let v = 0;
-        const fade = setInterval(() => { v = Math.min(0.6, v + 0.04); audio.volume = v; if (v >= 0.6) clearInterval(fade); }, 120);
+        const fade = setInterval(() => { v = Math.min(0.45, v + 0.03); audio.volume = v; if (v >= 0.45) clearInterval(fade); }, 120);
       }).catch(() => {});
     }
     ["s1", "s2", "s3", "s4"].forEach((cls, i) => setTimeout(() => gate.classList.add(cls), steps[i]));
