@@ -133,13 +133,89 @@
     $("#mapWrap").hidden = false;
   }
 
+  /* ---------- رسمة القاعة والعداد ---------- */
+  const CAP = C.capacity || 450;
+  const API = C.rsvpEndpoint;
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = $("#hallSvg");
+  const seats = [];
+  (function drawHall() {
+    const el = (tag, attrs, parent = svg) => {
+      const n = document.createElementNS(NS, tag);
+      for (const k in attrs) n.setAttribute(k, attrs[k]);
+      parent.append(n);
+      return n;
+    };
+    el("rect", { x: 131, y: 6, width: 130, height: 30, rx: 15, class: "stage" });
+    const t = el("text", { x: 196, y: 26, class: "stage-label", "text-anchor": "middle" });
+    t.textContent = "الكوشة";
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const skip = new Set(["0-2", "0-3", "0-4", "6-3"]);   // ساحة الرقص قدام الكوشة + المدخل
+    for (let r = 0; r < 7; r++) {
+      for (let c = 0; c < 7; c++) {
+        if (skip.has(`${r}-${c}`)) continue;
+        const cx = 28 + c * 56, cy = 82 + r * 56;
+        el("circle", { cx, cy, r: 10.5, class: "table" });
+        for (let k = 0; k < 10; k++) {
+          const a = (k / 10) * Math.PI * 2 - Math.PI / 2;
+          const d = el("circle", { cx: (cx + Math.cos(a) * 18.5).toFixed(1), cy: (cy + Math.sin(a) * 18.5).toFixed(1), r: 3.6, class: "seat" });
+          seats.push({ d, order: r * 10 + rnd() * 9 });   // بتتملي من قدام لورا
+        }
+      }
+    }
+    seats.sort((a, b) => a.order - b.order);
+  })();
+
+  let reserved = 0;
+  const dotsFor = (n) => Math.min(seats.length, Math.round((n / CAP) * seats.length));
+  function renderSeats() {
+    const on = dotsFor(reserved);
+    seats.forEach((s, i) => s.d.classList.toggle("on", i < on));
+    if (!API) return;
+    const left = Math.max(0, CAP - reserved);
+    $("#seatsMeter").hidden = false;
+    $("#meterFill").style.width = `${Math.min(100, (reserved / CAP) * 100)}%`;
+    $("#seatsCap").textContent = ar(CAP);
+    $("#seatsLeft").textContent = ar(left);
+    $("#seatsMeter").classList.toggle("almost", left / CAP < 0.15);
+    if (left === 0) $("#seatsMeter p").textContent = "الأماكن اكتملت 🤍";
+  }
+  function lightMine(n) {
+    const from = dotsFor(reserved);
+    reserved += n;
+    const to = Math.max(from + 1, dotsFor(reserved));
+    renderSeats();
+    seats.slice(from, to).forEach((s, i) => {
+      s.d.classList.add("on");
+      setTimeout(() => s.d.classList.add("mine"), 120 * i);
+    });
+    $("#hall").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  /* ---------- البيانات من Google Sheet ---------- */
+  let wishes = [];
+  let wishShown = 12;
+  async function loadStats() {
+    if (!API) return;
+    try {
+      const res = await fetch(API, { cache: "no-store" });
+      const data = await res.json();
+      reserved = Number(data.reserved) || 0;
+      wishes = Array.isArray(data.wishes) ? data.wishes : [];
+      renderSeats();
+      renderWishes();
+    } catch (_) {}
+  }
+  const post = (data) => fetch(API, { method: "POST", mode: "no-cors", body: new URLSearchParams(data) });
+
   /* ---------- تأكيد الحضور ---------- */
   const form = $("#rsvpForm");
   const countOut = $("#guestCount");
   const countField = $("#countField");
   const KEY = "rsvp:" + (guest || "_");
   let count = 1;
-  const renderCount = () => { countOut.textContent = ar(count); countOut.value = count; };
+  const renderCount = () => { countOut.textContent = ar(count); };
   renderCount();
   $$(".stepper button").forEach((b) => b.addEventListener("click", () => {
     count = Math.max(1, Math.min(maxGuests, count + Number(b.dataset.step)));
@@ -153,8 +229,8 @@
     form.hidden = true;
     $("#rsvpDone").hidden = false;
     if (data.attending === "yes") {
-      $("#rsvpDoneTitle").textContent = "منورنا من دلوقتي";
-      $("#rsvpDoneText").textContent = `أكدنا حضور ${ar(data.count)} ${data.count > 1 ? "أفراد" : "فرد"} — مستنيينك 🤍`;
+      $("#rsvpDoneTitle").textContent = "اتحجزلك مكان 🤍";
+      $("#rsvpDoneText").textContent = `أكدنا حضور ${ar(data.count)} ${data.count > 1 ? "أفراد" : "فرد"} — منورنا من دلوقتي`;
     } else {
       $("#rsvpDoneTitle").textContent = "هنفتقدك";
       $("#rsvpDoneText").textContent = "شكرا إنك عرفتنا ودعواتك توصلنا 🤍";
@@ -176,12 +252,13 @@
     err.hidden = true;
     const fd = new FormData(form);
     const data = {
+      type: "rsvp",
       name: String(fd.get("name") || "").trim(),
       attending: fd.get("attending"),
       count: fd.get("attending") === "yes" ? count : 0,
       message: String(fd.get("message") || "").trim(),
       invitedAs: guest,
-      submittedAt: new Date().toISOString(),
+      website: String(fd.get("website") || ""),
     };
     if (!data.name) {
       err.textContent = "اكتب اسمك الأول";
@@ -192,10 +269,12 @@
 
     const btn = $("#rsvpSubmit");
     btn.disabled = true;
-    btn.textContent = "بنبعت…";
+    btn.textContent = "بنحجز…";
     try {
-      if (C.rsvpEndpoint) {
-        await fetch(C.rsvpEndpoint, { method: "POST", mode: "no-cors", body: new URLSearchParams(data) });
+      let prev = null;
+      try { prev = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (_) {}
+      if (API) {
+        await post(data);
       } else {
         const msg = data.attending === "yes"
           ? `السلام عليكم 🤍\nأنا ${data.name} وإن شاء الله هحضر الفرح\nعدد الأفراد: ${data.count}${data.message ? `\n\n${data.message}` : ""}`
@@ -204,14 +283,88 @@
       }
       try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (_) {}
       showDone(data);
+      const delta = data.count - (prev ? prev.count || 0 : 0);
+      if (delta > 0) lightMine(delta);
+      else { reserved = Math.max(0, reserved + delta); renderSeats(); }
+      if (data.message && API) {
+        wishes.unshift({ name: data.name, message: data.message, time: Date.now() });
+        renderWishes();
+      }
+      setTimeout(loadStats, 2500);
     } catch (_) {
       err.textContent = "حصلت مشكلة في الإرسال، جرب تاني";
       err.hidden = false;
     } finally {
       btn.disabled = false;
-      btn.textContent = "ابعت الرد";
+      btn.textContent = "احجز مكانك";
     }
   });
+
+  /* ---------- دفتر التهاني ---------- */
+  const wishList = $("#wishList");
+  const rtf = new Intl.RelativeTimeFormat("ar-EG", { numeric: "auto" });
+  function ago(t) {
+    const s = (t - Date.now()) / 1000;
+    const units = [["day", 86400], ["hour", 3600], ["minute", 60]];
+    for (const [u, sec] of units) if (Math.abs(s) >= sec) return rtf.format(Math.round(s / sec), u);
+    return "دلوقتي";
+  }
+  function renderWishes() {
+    wishList.textContent = "";
+    wishes.slice(0, wishShown).forEach((w) => {
+      const card = document.createElement("article");
+      card.className = "wish";
+      const p = document.createElement("p");
+      p.textContent = w.message;
+      const foot = document.createElement("footer");
+      const b = document.createElement("b");
+      b.textContent = w.name;
+      const time = document.createElement("time");
+      time.textContent = ago(w.time);
+      foot.append(b, time);
+      card.append(p, foot);
+      wishList.append(card);
+    });
+    $("#wishMore").hidden = wishes.length <= wishShown;
+  }
+  $("#wishMore").addEventListener("click", () => { wishShown += 12; renderWishes(); });
+
+  if (API) {
+    $("#wishes").hidden = false;
+    if (guest) $("#wishName").value = guest;
+    const msgEl = $("#wishMsg");
+    msgEl.addEventListener("input", () => { $("#wishCount").textContent = `${ar(msgEl.value.length)} / ٤٠٠`; });
+    $("#wishForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const err = $("#wishError");
+      err.hidden = true;
+      const name = $("#wishName").value.trim();
+      const message = msgEl.value.trim();
+      if (!name || !message) {
+        err.textContent = !name ? "اكتب اسمك" : "اكتب التهنئة";
+        err.hidden = false;
+        return;
+      }
+      const btn = $("#wishSubmit");
+      btn.disabled = true;
+      try {
+        await post({ type: "wish", name, message, invitedAs: guest, website: $("#wishForm [name=website]").value });
+        wishes.unshift({ name, message, time: Date.now() });
+        renderWishes();
+        msgEl.value = "";
+        $("#wishCount").textContent = "٠ / ٤٠٠";
+        wishList.firstElementChild?.classList.add("fresh");
+      } catch (_) {
+        err.textContent = "حصلت مشكلة، جرب تاني";
+        err.hidden = false;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
+  renderSeats();
+  loadStats();
 
   /* ---------- معرض الصور ---------- */
   const gallery = $("#gallery");

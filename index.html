@@ -170,8 +170,16 @@
     <section class="rsvp" id="rsvp">
       <div class="rsvp-card reveal">
         <span class="chapter-num">تأكيد الحضور</span>
-        <h2>هتنورنا؟</h2>
-        <p class="rsvp-note">ياريت تأكد حضورك <span data-bind="rsvpDeadlineText"></span> عشان نجهزلك مكانك</p>
+        <h2>احجز مكانك</h2>
+        <p class="rsvp-note">الأماكن محدودة، ياريت تأكد حضورك <span data-bind="rsvpDeadlineText"></span></p>
+
+        <div class="hall" id="hall" aria-hidden="true">
+          <svg id="hallSvg" viewBox="0 0 392 452"></svg>
+        </div>
+        <div class="seats-meter" id="seatsMeter" hidden>
+          <div class="meter-bar"><span id="meterFill"></span></div>
+          <p><b id="seatsLeft">٠</b> مكان متبقي من <span id="seatsCap">٠</span></p>
+        </div>
 
         <form id="rsvpForm" novalidate>
           <label class="field">
@@ -199,7 +207,8 @@
             <textarea name="message" rows="3" placeholder="تهنئة أو دعوة حلوة…"></textarea>
           </label>
 
-          <button class="btn solid wide" type="submit" id="rsvpSubmit">ابعت الرد</button>
+          <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <button class="btn solid wide" type="submit" id="rsvpSubmit">احجز مكانك</button>
           <p class="form-error" id="rsvpError" hidden></p>
         </form>
 
@@ -210,6 +219,29 @@
           <button type="button" class="link-btn" id="rsvpEdit">عاوز تعدل ردك؟</button>
         </div>
       </div>
+    </section>
+
+    <!-- ================= التهاني ================= -->
+    <section class="wishes" id="wishes" hidden>
+      <div class="sec-head reveal">
+        <span class="chapter-num">دفتر التهاني</span>
+        <h2>كلمة حلوة</h2>
+        <p class="wishes-note">حتى لو مش هتقدر تحضر، سيبلنا دعوة أو تهنئة</p>
+      </div>
+
+      <form class="wish-form reveal" id="wishForm" novalidate>
+        <input type="text" name="name" id="wishName" maxlength="60" placeholder="اسمك" autocomplete="name" />
+        <textarea name="message" id="wishMsg" maxlength="400" rows="3" placeholder="اكتب تهنئتك…"></textarea>
+        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <div class="wish-actions">
+          <small id="wishCount">٠ / ٤٠٠</small>
+          <button class="btn" type="submit" id="wishSubmit">انشر التهنئة</button>
+        </div>
+        <p class="form-error" id="wishError" hidden></p>
+      </form>
+
+      <div class="wish-list" id="wishList" aria-live="polite"></div>
+      <button type="button" class="btn ghost wish-more" id="wishMore" hidden>اعرض أكتر</button>
     </section>
 
     <!-- ================= الصور ================= -->
