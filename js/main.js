@@ -133,45 +133,75 @@
     $("#mapWrap").hidden = false;
   }
 
-  /* ---------- رسمة القاعة والعداد ---------- */
+  /* ---------- رسمة القاعة واختيار الكراسي ---------- */
   const CAP = C.capacity || 450;
   const API = C.rsvpEndpoint;
   const NS = "http://www.w3.org/2000/svg";
+  const KEY = "rsvp:" + (guest || "_");
+  const svgEl = (tag, attrs, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.append(n);
+    return n;
+  };
   const svg = $("#hallSvg");
-  const seats = [];
+  const tables = [];
+  const seatById = new Map();
+  const frontOrder = [];             // ترتيب الكراسي من قدام لورا
   (function drawHall() {
-    const el = (tag, attrs, parent = svg) => {
-      const n = document.createElementNS(NS, tag);
-      for (const k in attrs) n.setAttribute(k, attrs[k]);
-      parent.append(n);
-      return n;
-    };
-    el("rect", { x: 131, y: 6, width: 130, height: 30, rx: 15, class: "stage" });
-    const t = el("text", { x: 196, y: 26, class: "stage-label", "text-anchor": "middle" });
-    t.textContent = "الكوشة";
-    let seed = 7;
-    const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    svgEl("rect", { x: 131, y: 6, width: 130, height: 30, rx: 15, class: "stage" }, svg);
+    svgEl("text", { x: 196, y: 26, class: "stage-label", "text-anchor": "middle" }, svg).textContent = "الكوشة";
     const skip = new Set(["0-2", "0-3", "0-4", "6-3"]);   // ساحة الرقص قدام الكوشة + المدخل
+    let ti = 0;
     for (let r = 0; r < 7; r++) {
       for (let c = 0; c < 7; c++) {
         if (skip.has(`${r}-${c}`)) continue;
         const cx = 28 + c * 56, cy = 82 + r * 56;
-        el("circle", { cx, cy, r: 10.5, class: "table" });
+        const g = svgEl("g", { class: "tbl", "data-t": ti }, svg);
+        svgEl("circle", { cx, cy, r: 26, class: "tbl-hit" }, g);
+        svgEl("circle", { cx, cy, r: 10.5, class: "table" }, g);
+        svgEl("text", { x: cx, y: cy + 3.2, class: "tbl-num", "text-anchor": "middle" }, g).textContent = ar(ti + 1);
+        const t = { i: ti, g, seats: [] };
         for (let k = 0; k < 10; k++) {
           const a = (k / 10) * Math.PI * 2 - Math.PI / 2;
-          const d = el("circle", { cx: (cx + Math.cos(a) * 18.5).toFixed(1), cy: (cy + Math.sin(a) * 18.5).toFixed(1), r: 3.6, class: "seat" });
-          seats.push({ d, order: r * 10 + rnd() * 9 });   // بتتملي من قدام لورا
+          const id = `t${ti}-${k}`;
+          const d = svgEl("circle", { cx: (cx + Math.cos(a) * 18.5).toFixed(1), cy: (cy + Math.sin(a) * 18.5).toFixed(1), r: 3.6, class: "seat" }, g);
+          const seat = { id, t: ti, k, d };
+          t.seats.push(seat);
+          seatById.set(id, seat);
+          frontOrder.push(seat);
         }
+        tables.push(t);
+        ti++;
       }
     }
-    seats.sort((a, b) => a.order - b.order);
   })();
 
-  let reserved = 0;
-  const dotsFor = (n) => Math.min(seats.length, Math.round((n / CAP) * seats.length));
+  // الحالة
+  let reserved = 0;                  // إجمالي المحجوز من الشيت
+  let takenIds = new Set();          // كراسي محجوزة لغيرك
+  let picked = [];                   // الكراسي اللي انت مختارها (بالترتيب)
+  let booked = false;                // حجزت خلاص
+  let current = null;                // الترابيزة المفتوحة
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved && saved.seats) { picked = saved.seats.split(",").filter((s) => seatById.has(s)); booked = saved.attending === "yes"; }
+  } catch (_) {}
+  const pickedSet = () => new Set(picked);
+
   function renderSeats() {
-    const on = dotsFor(reserved);
-    seats.forEach((s, i) => s.d.classList.toggle("on", i < on));
+    const mine = pickedSet();
+    frontOrder.forEach((s) => {
+      let state = "";
+      if (mine.has(s.id)) state = booked ? "mine booked" : "mine";
+      else if (takenIds.has(s.id)) state = "on";
+      s.d.setAttribute("class", "seat " + state);
+    });
+    tables.forEach((t) => t.g.classList.toggle("active", current === t.i));
+    if (current !== null) renderPicker();
+    renderMeter();
+  }
+  function renderMeter() {
     if (!API) return;
     const left = Math.max(0, CAP - reserved);
     $("#seatsMeter").hidden = false;
@@ -179,19 +209,72 @@
     $("#seatsCap").textContent = ar(CAP);
     $("#seatsLeft").textContent = ar(left);
     $("#seatsMeter").classList.toggle("almost", left / CAP < 0.15);
-    if (left === 0) $("#seatsMeter p").textContent = "الأماكن اكتملت 🤍";
   }
-  function lightMine(n) {
-    const from = dotsFor(reserved);
-    reserved += n;
-    const to = Math.max(from + 1, dotsFor(reserved));
-    renderSeats();
-    seats.slice(from, to).forEach((s, i) => {
-      s.d.classList.add("on");
-      setTimeout(() => s.d.classList.add("mine"), 120 * i);
+  const isFree = (s) => !takenIds.has(s.id);
+
+  /* الترابيزة المكبرة */
+  const picker = $("#picker");
+  const psvg = $("#pickerSvg");
+  function renderPicker() {
+    const t = tables[current];
+    const mine = pickedSet();
+    psvg.textContent = "";
+    svgEl("circle", { cx: 120, cy: 120, r: 46, class: "p-table" }, psvg);
+    svgEl("text", { x: 120, y: 116, class: "p-label", "text-anchor": "middle" }, psvg).textContent = "ترابيزة";
+    svgEl("text", { x: 120, y: 140, class: "p-num", "text-anchor": "middle" }, psvg).textContent = ar(t.i + 1);
+    t.seats.forEach((s) => {
+      const a = (s.k / 10) * Math.PI * 2 - Math.PI / 2;
+      const x = 120 + Math.cos(a) * 88, y = 120 + Math.sin(a) * 88;
+      const state = mine.has(s.id) ? "mine" : isFree(s) ? "free" : "taken";
+      const g = svgEl("g", { class: `p-seat ${state}`, "data-id": s.id, tabindex: state === "taken" ? -1 : 0, role: "button", "aria-label": `كرسي ${s.k + 1}` }, psvg);
+      svgEl("circle", { cx: x.toFixed(1), cy: y.toFixed(1), r: 17 }, g);
     });
-    $("#hall").scrollIntoView({ behavior: "smooth", block: "center" });
+    const need = currentCount();
+    $("#pickerTitle").textContent = `ترابيزة ${ar(t.i + 1)}`;
+    $("#pickerHint").textContent = booked
+      ? "دي كراسيك 🤍 لو عاوز تغيرها دوس «عاوز تعدل ردك؟»"
+      : picked.length >= need
+        ? `اخترت ${ar(picked.length)} من ${ar(need)} — كمّل وأكد الحجز تحت`
+        : `اختار ${ar(need - picked.length)} ${need - picked.length > 1 ? "كراسي" : "كرسي"} كمان`;
   }
+  function openTable(i) {
+    current = i;
+    picker.hidden = false;
+    if (!booked && picked.length === 0) autoPick(i);   // أول ما يختار ترابيزة نختارله كراسي جنب بعض
+    renderSeats();
+  }
+  function autoPick(i, n = currentCount() - picked.length) {
+    const mine = pickedSet();
+    const pool = [...tables[i].seats, ...frontOrder.filter((s) => s.t !== i)];
+    for (const s of pool) {
+      if (n <= 0) break;
+      if (!mine.has(s.id) && isFree(s)) { picked.push(s.id); mine.add(s.id); n--; }
+    }
+  }
+  function toggleSeat(id) {
+    if (booked) return;
+    const s = seatById.get(id);
+    const i = picked.indexOf(id);
+    if (i >= 0) picked.splice(i, 1);
+    else if (isFree(s)) {
+      if (picked.length >= currentCount()) picked.shift();   // لو مكمّل، أقدم اختيار يتشال
+      picked.push(id);
+    } else return;
+    renderSeats();
+  }
+  svg.addEventListener("click", (e) => {
+    const g = e.target.closest(".tbl");
+    if (g && !$("#countField").hidden) openTable(Number(g.dataset.t));
+  });
+  psvg.addEventListener("click", (e) => {
+    const g = e.target.closest(".p-seat");
+    if (g) toggleSeat(g.dataset.id);
+  });
+  psvg.addEventListener("keydown", (e) => {
+    const g = e.target.closest(".p-seat");
+    if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggleSeat(g.dataset.id); }
+  });
+  $("#pickerClose").addEventListener("click", () => { current = null; picker.hidden = true; renderSeats(); });
 
   /* ---------- البيانات من Google Sheet ---------- */
   let wishes = [];
@@ -202,6 +285,10 @@
       const res = await fetch(API, { cache: "no-store" });
       const data = await res.json();
       reserved = Number(data.reserved) || 0;
+      const mine = booked ? pickedSet() : new Set();
+      takenIds = new Set((data.taken || []).filter((id) => !mine.has(id)));
+      // لو حد سبقك على كرسي كنت مختاره ولسه ما حجزتش، نشيله
+      if (!booked) picked = picked.filter((id) => !takenIds.has(id));
       wishes = Array.isArray(data.wishes) ? data.wishes : [];
       renderSeats();
       renderWishes();
@@ -213,24 +300,36 @@
   const form = $("#rsvpForm");
   const countOut = $("#guestCount");
   const countField = $("#countField");
-  const KEY = "rsvp:" + (guest || "_");
-  let count = 1;
+  let count = Math.max(1, Math.min(maxGuests, picked.length || 1));
+  function currentCount() { return countField.hidden ? 0 : count; }
   const renderCount = () => { countOut.textContent = ar(count); };
   renderCount();
   $$(".stepper button").forEach((b) => b.addEventListener("click", () => {
     count = Math.max(1, Math.min(maxGuests, count + Number(b.dataset.step)));
     renderCount();
+    if (!booked) {
+      if (picked.length > count) picked = picked.slice(0, count);
+      else if (current !== null && picked.length < count) autoPick(current);
+      renderSeats();
+    }
   }));
   form.addEventListener("change", (e) => {
-    if (e.target.name === "attending") countField.hidden = e.target.value === "no";
+    if (e.target.name !== "attending") return;
+    countField.hidden = e.target.value === "no";
+    $("#hallHint").hidden = countField.hidden;
+    if (countField.hidden) { picked = []; current = null; picker.hidden = true; }
+    renderSeats();
   });
 
   function showDone(data) {
     form.hidden = true;
     $("#rsvpDone").hidden = false;
     if (data.attending === "yes") {
+      const ts = [...new Set(picked.map((id) => seatById.get(id).t + 1))];
       $("#rsvpDoneTitle").textContent = "اتحجزلك مكان 🤍";
-      $("#rsvpDoneText").textContent = `أكدنا حضور ${ar(data.count)} ${data.count > 1 ? "أفراد" : "فرد"} — منورنا من دلوقتي`;
+      $("#rsvpDoneText").textContent = ts.length
+        ? `${ar(data.count)} ${data.count > 1 ? "كراسي" : "كرسي"} على ${ts.length > 1 ? "ترابيزات" : "ترابيزة"} ${ts.map(ar).join(" و")} — منورنا من دلوقتي`
+        : `أكدنا حضور ${ar(data.count)} ${data.count > 1 ? "أفراد" : "فرد"} — منورنا من دلوقتي`;
     } else {
       $("#rsvpDoneTitle").textContent = "هنفتقدك";
       $("#rsvpDoneText").textContent = "شكرا إنك عرفتنا ودعواتك توصلنا 🤍";
@@ -244,6 +343,9 @@
   $("#rsvpEdit").addEventListener("click", () => {
     $("#rsvpDone").hidden = true;
     form.hidden = false;
+    booked = false;                       // كراسيه القديمة تفضل مختارة ويقدر يغيرها
+    renderSeats();
+    $("#hall").scrollIntoView({ behavior: "smooth", block: "center" });
   });
 
   form.addEventListener("submit", async (e) => {
@@ -251,11 +353,17 @@
     const err = $("#rsvpError");
     err.hidden = true;
     const fd = new FormData(form);
+    const attending = fd.get("attending");
+    if (attending === "yes") {
+      if (picked.length > count) picked = picked.slice(0, count);
+      if (picked.length < count) autoPick(current ?? tables[0].i, count - picked.length);
+    } else picked = [];
     const data = {
       type: "rsvp",
       name: String(fd.get("name") || "").trim(),
-      attending: fd.get("attending"),
-      count: fd.get("attending") === "yes" ? count : 0,
+      attending,
+      count: attending === "yes" ? count : 0,
+      seats: picked.join(","),
       message: String(fd.get("message") || "").trim(),
       invitedAs: guest,
       website: String(fd.get("website") || ""),
@@ -282,10 +390,11 @@
         window.open(`https://wa.me/${C.whatsappNumber}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
       }
       try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (_) {}
+      reserved = Math.max(0, reserved + data.count - (prev && prev.attending === "yes" ? prev.count || 0 : 0));
+      booked = attending === "yes";
       showDone(data);
-      const delta = data.count - (prev ? prev.count || 0 : 0);
-      if (delta > 0) lightMine(delta);
-      else { reserved = Math.max(0, reserved + delta); renderSeats(); }
+      renderSeats();
+      if (booked) $("#hall").scrollIntoView({ behavior: "smooth", block: "center" });
       if (data.message && API) {
         wishes.unshift({ name: data.name, message: data.message, time: Date.now() });
         renderWishes();

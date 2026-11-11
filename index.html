@@ -173,8 +173,19 @@
         <h2>احجز مكانك</h2>
         <p class="rsvp-note">الأماكن محدودة، ياريت تأكد حضورك <span data-bind="rsvpDeadlineText"></span></p>
 
-        <div class="hall" id="hall" aria-hidden="true">
-          <svg id="hallSvg" viewBox="0 0 392 452"></svg>
+        <p class="hall-hint" id="hallHint">دوس على الترابيزة اللي تعجبك واختار كراسيك</p>
+        <div class="hall" id="hall">
+          <svg id="hallSvg" viewBox="0 0 392 452" role="img" aria-label="رسمة القاعة"></svg>
+        </div>
+        <div class="picker" id="picker" hidden>
+          <div class="picker-head">
+            <b id="pickerTitle">ترابيزة</b>
+            <button type="button" class="picker-close" id="pickerClose" aria-label="إغلاق">×</button>
+          </div>
+          <svg id="pickerSvg" viewBox="0 0 240 240"></svg>
+          <div class="picker-legend"><span class="lg free"></span>فاضي <span class="lg mine"></span>اختيارك <span class="lg taken"></span>محجوز</div>
+          <p class="picker-hint" id="pickerHint"></p>
+          <p class="picker-note">ده عشان نعرف تحب تقعد فين، والقعدة يوم الفرح حرة 🤍</p>
         </div>
         <div class="seats-meter" id="seatsMeter" hidden>
           <div class="meter-bar"><span id="meterFill"></span></div>
