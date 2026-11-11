@@ -73,6 +73,26 @@ function assignSeats_(wanted, count, taken) {
   return out;
 }
 
+// كل ضيف حاجز ياخد كراسي: اللي مختارها، ولو ناقصة (حجوزات قديمة) نكملها من قدام بنفس الترتيب كل مرة
+function resolve_(latest) {
+  const taken = [];
+  const keys = Object.keys(latest).filter((k) => latest[k].count > 0);
+  keys.forEach((k) => {
+    const x = latest[k];
+    x.seats = x.seats.filter((id) => taken.indexOf(id) < 0).slice(0, x.count);
+    taken.push(...x.seats);
+  });
+  keys.forEach((k) => {
+    const x = latest[k];
+    if (x.seats.length < x.count) {
+      const more = assignSeats_([], x.count - x.seats.length, taken);
+      x.seats.push(...more);
+      taken.push(...more);
+    }
+  });
+  return latest;
+}
+
 function doPost(e) {
   const p = e.parameter || {};
   if (p.website) return json_({ ok: true });                 // فخ للسبام: الخانة دي مخفية عن البني آدمين
@@ -99,7 +119,7 @@ function doPost(e) {
     let seats = [];
     if (isYes) {
       const all = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, HEADERS.length).getValues() : [];
-      const latest = latest_(all);
+      const latest = resolve_(latest_(all));
       const me = clean_(p.invitedAs, 60) || name;
       const taken = [];
       Object.keys(latest).forEach((k) => { if (k !== me) taken.push(...latest[k].seats); });
@@ -134,7 +154,7 @@ function doGet() {
   const rows = last > 1 ? sh.getRange(2, 1, last - 1, HEADERS.length).getValues() : [];
 
   // عدد المحجوز: آخر رد لكل ضيف هو اللي بيتحسب (لو عدّل رده)
-  const latest = latest_(rows);
+  const latest = resolve_(latest_(rows));
   const wishes = [];
   rows.forEach((r) => {
     const name = String(r[COL.name - 1]);
