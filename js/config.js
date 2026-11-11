@@ -26,7 +26,7 @@ window.WEDDING = {
 
   // ——— تأكيد الحضور ———
   rsvpDeadlineText: "قبل ٢٧ نوفمبر",
-  rsvpEndpoint: "https://script.google.com/macros/s/AKfycbzwd2WEDlstA7r6TmIJrSvLytArzhHi9Xjnhtf8wHDEoTE91OEyTW6qpKTKUirMaIE_wg/exec",
+  rsvpEndpoint: "https://script.google.com/macros/s/AKfycby5X3ziBVILSreGg40Uui3q9xKTnjx89Zz1Bj9weRB4tcvXSyLYWf381ipzfejzqQJNiQ/exec",
   whatsappNumber: "201000000000",     // رقمك بالصيغة الدولية من غير + (للرد البديل)
   maxGuestsDefault: 4,                // أقصى عدد أفراد لو مفيش رقم محدد في لينك الضيف
   capacity: 450,                      // عدد أماكن القاعة (للعداد ورسمة الكراسي)
