@@ -8,6 +8,11 @@
   const guest = (params.get("to") || "").trim().slice(0, 60);
   const maxGuests = Math.max(1, Math.min(20, parseInt(params.get("n"), 10) || C.maxGuestsDefault || 4));
 
+  /* ---------- منع تكبير الصفحة (Safari بيتجاهل user-scalable=no) ---------- */
+  ["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
+    document.addEventListener(ev, (e) => e.preventDefault(), { passive: false }));
+  document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+
   /* ---------- ربط النصوص من config ---------- */
   $$("[data-bind]").forEach((el) => {
     const v = C[el.dataset.bind];
