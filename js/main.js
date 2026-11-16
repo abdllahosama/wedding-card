@@ -475,44 +475,4 @@
   renderSeats();
   loadStats();
 
-  /* ---------- معرض الصور ---------- */
-  const gallery = $("#gallery");
-  const pics = Array.from({ length: 12 }, (_, i) => `images/gallery/${String(i + 1).padStart(2, "0")}.jpg`);
-  pics.forEach((src, i) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "reveal";
-    b.setAttribute("aria-label", `صورة ${i + 1}`);
-    b.style.transitionDelay = `${(i % 3) * 0.08}s`;
-    const img = new Image();
-    img.src = src; img.alt = ""; img.loading = "lazy"; img.decoding = "async";
-    img.width = 867; img.height = 1300;   // يمنع اهتزاز الصفحة وقت تحميل الصور
-    b.append(img);
-    b.addEventListener("click", () => openLb(i));
-    gallery.append(b);
-    io.observe(b);
-  });
-
-  const lb = $("#lightbox");
-  const lbImg = $("img", lb);
-  let lbIndex = 0;
-  function openLb(i) { lbIndex = i; lbImg.src = pics[i]; lb.hidden = false; document.body.style.overflow = "hidden"; }
-  function closeLb() { lb.hidden = true; document.body.style.overflow = ""; }
-  function step(d) { lbIndex = (lbIndex + d + pics.length) % pics.length; lbImg.src = pics[lbIndex]; }
-  $(".lb-close", lb).addEventListener("click", closeLb);
-  $(".lb-prev", lb).addEventListener("click", () => step(-1));
-  $(".lb-next", lb).addEventListener("click", () => step(1));
-  lb.addEventListener("click", (e) => { if (e.target === lb) closeLb(); });
-  document.addEventListener("keydown", (e) => {
-    if (lb.hidden) return;
-    if (e.key === "Escape") closeLb();
-    if (e.key === "ArrowLeft") step(1);
-    if (e.key === "ArrowRight") step(-1);
-  });
-  let tx = 0;
-  lb.addEventListener("touchstart", (e) => { tx = e.touches[0].clientX; }, { passive: true });
-  lb.addEventListener("touchend", (e) => {
-    const dx = e.changedTouches[0].clientX - tx;
-    if (Math.abs(dx) > 50) step(dx > 0 ? 1 : -1);
-  });
 })();
