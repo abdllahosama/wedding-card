@@ -413,17 +413,14 @@ textarea { resize: vertical; min-height: 90px; }
 .wish-more { display: flex; margin: 10px auto 0; }
 
 /* ================= الختام ================= */
-.finale { position: relative; height: 100svh; min-height: 560px; overflow: hidden; color: var(--white); }
-.finale img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 75%; }
-.finale-shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(22,36,54,.55) 0%, rgba(22,36,54,.2) 35%, rgba(22,36,54,0) 55%); }
-.finale-content { position: absolute; inset: 0 0 auto 0; text-align: center; padding: calc(clamp(64px, 12vh, 130px) + env(safe-area-inset-top)) 24px 0; }
-.finale-content p { font-size: clamp(1.05rem, 3.4vw, 1.3rem); font-weight: 300; }
-.finale-content h2 { font-family: var(--f-display); font-weight: 400; font-size: clamp(3rem, 12vw, 5.6rem); line-height: 1.4; text-shadow: 0 4px 30px rgba(0,0,0,.2); }
-.finale-content em { color: #f1dcb4; }
-.finale-date { font-size: .95rem; letter-spacing: .04em; }
+.finale { padding: clamp(100px, 16vw, 170px) 24px clamp(90px, 14vw, 150px); text-align: center; background: var(--sand-50); border-top: 1px solid var(--sand-200); }
+.finale-content p { font-size: clamp(1rem, 3vw, 1.15rem); color: var(--ink-soft); }
+.finale-content h2 { font-family: var(--f-display); font-weight: 400; font-size: clamp(2.8rem, 10vw, 4.6rem); line-height: 1.5; margin: 4px 0; }
+.finale-content .divider { margin: 0 auto 26px; }
+.finale-date { font-size: .9rem; letter-spacing: .04em; color: var(--gold-deep); }
 
-.foot { text-align: center; padding: 40px 24px calc(40px + env(safe-area-inset-bottom)); background: var(--ink); color: var(--sand-200); }
-.foot p { font-family: var(--f-quote); font-size: 1.15rem; }
+.foot { text-align: center; padding: 0 24px calc(48px + env(safe-area-inset-bottom)); background: var(--sand-50); color: var(--ink-soft); }
+.foot p { font-family: var(--f-quote); font-size: 1.05rem; }
 
 /* ================= موبايل ================= */
 @media (max-width: 760px) {
@@ -440,27 +437,23 @@ textarea { resize: vertical; min-height: 90px; }
 
 /* ================= شاشات عريضة: الصورة في نص والكلام في نص ================= */
 @media (min-width: 900px) and (min-aspect-ratio: 1/1) {
-  .hero, .finale { background: var(--pattern), var(--sand-100); color: var(--ink); }
-  .hero-shade, .finale-shade { display: none; }
+  .hero { background: var(--pattern), var(--sand-100); color: var(--ink); }
+  .hero-shade { display: none; }
   .hero-media { inset: 0 0 0 auto; width: 50%; }
-  .hero-content, .finale-content {
+  .hero-content {
     inset: 0 auto 0 0; width: 50%;
     padding: 0 clamp(32px, 5vw, 80px);
     justify-content: center;
     display: flex; flex-direction: column; align-items: center;
   }
-  .names, .finale-content h2 { text-shadow: none; }
+  .names { text-shadow: none; }
   .names { font-size: clamp(3rem, 5.6vw, 5.4rem); flex-wrap: nowrap; }
-  .names .amp, .finale-content em { color: var(--gold); }
+  .names .amp { color: var(--gold); }
   .hero-greet b { color: var(--gold-deep); }
   .hero-date { border-color: var(--sand-300); color: var(--gold-deep); }
   .basmala { color: var(--ink-soft); }
   .scroll-cue { left: 25%; border-color: var(--sand-500); }
   .scroll-cue span { background: var(--gold-deep); }
-  .finale img { inset: 0 auto 0 0; width: 50%; object-position: center 80%; }
-  .finale-content { inset: 0 0 0 auto; }
-  .finale-content p { color: var(--ink-soft); }
-  .finale-date { color: var(--gold-deep); }
 }
 
 @media (prefers-reduced-motion: reduce) {
