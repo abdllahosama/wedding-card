@@ -413,14 +413,13 @@ textarea { resize: vertical; min-height: 90px; }
 .wish-more { display: flex; margin: 10px auto 0; }
 
 /* ================= الختام ================= */
-.finale { padding: clamp(100px, 16vw, 170px) 24px clamp(90px, 14vw, 150px); text-align: center; background: var(--sand-50); border-top: 1px solid var(--sand-200); }
+.finale { padding: clamp(100px, 16vw, 170px) 24px calc(48px + env(safe-area-inset-bottom)); text-align: center; background: var(--pattern), var(--sand-100); }
 .finale-content p { font-size: clamp(1rem, 3vw, 1.15rem); color: var(--ink-soft); }
 .finale-content h2 { font-family: var(--f-display); font-weight: 400; font-size: clamp(2.8rem, 10vw, 4.6rem); line-height: 1.5; margin: 4px 0; }
 .finale-content .divider { margin: 0 auto 26px; }
 .finale-date { font-size: .9rem; letter-spacing: .04em; color: var(--gold-deep); }
 
-.foot { text-align: center; padding: 0 24px calc(48px + env(safe-area-inset-bottom)); background: var(--sand-50); color: var(--ink-soft); }
-.foot p { font-family: var(--f-quote); font-size: 1.05rem; }
+.foot { margin-top: clamp(80px, 12vw, 130px); font-family: var(--f-quote); font-size: 1.05rem; color: var(--ink-soft); }
 
 /* ================= موبايل ================= */
 @media (max-width: 760px) {
