@@ -389,6 +389,7 @@ textarea { resize: vertical; min-height: 90px; }
 .hp { position: absolute !important; width: 1px !important; height: 1px !important; min-width: 0 !important; inset: 0 auto auto 0; padding: 0 !important; border: 0 !important; overflow: hidden; clip-path: inset(50%); opacity: 0; pointer-events: none; }
 
 /* ================= دفتر التهاني ================= */
+.sec-head { text-align: center; margin-bottom: 40px; }
 .wishes { padding: clamp(80px, 12vw, 130px) 22px clamp(80px, 12vw, 130px); max-width: 1100px; margin: 0 auto; }
 .wishes-note { color: var(--ink-soft); }
 .wish-form {
